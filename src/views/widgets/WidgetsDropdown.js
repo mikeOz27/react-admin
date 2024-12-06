@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import {
@@ -15,9 +15,61 @@ import { CChartBar, CChartLine } from '@coreui/react-chartjs'
 import CIcon from '@coreui/icons-react'
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons'
 
+import api from '../../api/axios'
+
 const WidgetsDropdown = (props) => {
   const widgetChartRef1 = useRef(null)
   const widgetChartRef2 = useRef(null)
+  const token = localStorage.getItem('token');
+  const [countUser, setCountUser] = useState(0);
+  const [countBlog, setCountBlog] = useState(0);
+  const [countRole, setCountRole] = useState(0);
+
+  const countUsers = async () => {
+    try {
+      const response = await api.get('/users/count_users', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      // setCountUser(response.status.data);
+      // console.log('Cantidad de usuarios:', response.data.status.data);
+      return response.data
+    }
+    catch (error) {
+      console.error('Error al obtener la cantidad de usuarios', error)
+    }
+  }
+
+  const countBlogs = async () => {
+    try {
+      const response = await api.get('/blogs/count_blogs', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log('Cantidad de blogs:', response.data.data);
+      return response.data
+    }
+    catch (error) {
+      console.error('Error al obtener la cantidad de usuarios', error)
+    }
+  }
+
+  const contRoles = async () => {
+    try {
+      const response = await api.get('/roles/count_roles', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log('Cantidad de roles:', response.data.data);
+      return response.data
+    }
+    catch (error) {
+      console.error('Error al obtener la cantidad de roles', error)
+    }
+  }
 
   useEffect(() => {
     document.documentElement.addEventListener('ColorSchemeChange', () => {
@@ -35,6 +87,25 @@ const WidgetsDropdown = (props) => {
         })
       }
     })
+    const fetchDataUser = async () => {
+      const userCount = await countUsers();
+      setCountUser(userCount.data);
+      console.log('Cantidad de usuarios:', userCount.data);
+    };
+
+    const fetchDataBlog = async () => {
+      const blogCount = await countBlogs();
+      setCountBlog(blogCount.data);
+    };
+
+    const fetchDataRole = async () => {
+      const roleCount = await contRoles();
+      setCountRole(roleCount.data);
+    };
+
+    fetchDataUser();
+    fetchDataBlog();
+    fetchDataRole();
   }, [widgetChartRef1, widgetChartRef2])
 
   return (
@@ -44,10 +115,7 @@ const WidgetsDropdown = (props) => {
           color="primary"
           value={
             <>
-              26K{' '}
-              <span className="fs-6 fw-normal">
-                (-12.4% <CIcon icon={cilArrowBottom} />)
-              </span>
+              {countUser !== null ? countUser : '0'}{' '}
             </>
           }
           title="Users"
@@ -129,18 +197,16 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
+
       <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="info"
           value={
             <>
-              $6.200{' '}
-              <span className="fs-6 fw-normal">
-                (40.9% <CIcon icon={cilArrowTop} />)
-              </span>
+              {countBlog !== null ? countBlog : '0'}{' '}
             </>
           }
-          title="Income"
+          title="Blogs"
           action={
             <CDropdown alignment="end">
               <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
@@ -218,18 +284,17 @@ const WidgetsDropdown = (props) => {
           }
         />
       </CCol>
+
       <CCol sm={6} xl={4} xxl={3}>
         <CWidgetStatsA
           color="warning"
           value={
             <>
-              2.49%{' '}
-              <span className="fs-6 fw-normal">
-                (84.7% <CIcon icon={cilArrowTop} />)
-              </span>
+              {countRole !== null ? countRole : '0'}{' '}
+              
             </>
           }
-          title="Conversion Rate"
+          title="Roles"
           action={
             <CDropdown alignment="end">
               <CDropdownToggle color="transparent" caret={false} className="text-white p-0">

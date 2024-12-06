@@ -1,11 +1,15 @@
 import axios from 'axios';
+import env from '../constants/apiConst';
+
+const { BASE_URL } = env
+const url = BASE_URL;
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/auth/',
+  baseURL: url,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Accept: 'application/json',
+  },
 });
 
 export default api;

@@ -1,6 +1,9 @@
 import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
+const User = React.lazy(() => import('./views/users/User'))
+const UserCreate = React.lazy(() => import('./views/users/UserCreate'))
+const Blog = React.lazy(() => import('./views/blogs/Blog'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -51,9 +54,23 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
+const token = localStorage.getItem('token') ? localStorage.getItem('token') : null
+// const Login = React.lazy(() => import('../src/components/
+
 const routes = [
-  // { path: '/', exact: true, name: 'Home' },
+  // { path: '/*', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
+  { path: '/users', name: 'User',
+    element: token ? (User ) : (Login)
+  },
+  {
+    path: '/users/create',
+    name: 'UserCreate',
+    element: token ? (UserCreate) : (Login)
+  },
+  { path: '/blogs', name: 'Blog',
+    element: token ? (Blog ) : (Login)
+  },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
