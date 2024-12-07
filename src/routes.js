@@ -66,12 +66,12 @@ const routes = [
   {
     path: '/users',
     name: 'User',
-    element: token ? (userAuth && userAuth.role === 'Admin' ? User : Page404) : <Navigate to="/login" />
+    element: token ? (userAuth && userAuth.role.name === 'Admin' ? User : Page404) : <Navigate to="/login" />
   },
   {
     path: '/users/create',
     name: 'UserCreate',
-    element: token ? (userAuth && userAuth.role === 'Admin' ? UserCreate : Page404) : <Navigate to="/login" />
+    element: token ? (userAuth && userAuth.role.name === 'Admin' ? UserCreate : Page404) : <Navigate to="/login" />
   },
   {
     path: '/blogs', name: 'Blog',

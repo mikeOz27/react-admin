@@ -36,10 +36,11 @@ import {
   cilUserFollow
 } from '@coreui/icons'
 
+import { useRole } from '../../hoks/useRole'
+import { useUser } from '../../hoks/useUser'
+
 function User() {
   const [token] = useState(localStorage.getItem('token'));
-  const [userAuth] = useState(JSON.parse(localStorage.getItem('userAuth')));
-  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
@@ -47,15 +48,17 @@ function User() {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  //TODO PASAR AL HOCKS
+  const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 3;
-
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const [loading, setLoading] = useState('Cargando...');
+  const { getRoles } = useRole();
+  const { getUsers } = useUser();
 
   //TODO MODAL PARA VER USUARIO
   const ViewUserModal = ({ isOpen, onRequestClose, user }) => (
@@ -479,132 +482,68 @@ function User() {
     };
 
     // REFRESCAR TOKEN
-    const refreshToken = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await api.post('/refresh_token', {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        if (response.data.code === 200) {
-          localStorage.setItem('token', response.data.token); // Guarda el nuevo token
-          Swal.fire({
-            title: 'Token Refrescado',
-            text: 'Tu sesión ha sido extendida exitosamente.',
-            icon: 'success',
-            confirmButtonText: 'Aceptar'
-          });
-        } else {
-          const isAlteredToken = alteredToken();
-          if (isAlteredToken) {
-            return; // Salir si el token fue alterado o es inválido
-          }
-        }
-      } catch (error) {
-        Swal.fire({
-          title: 'Error',
-          text: 'El token ha caducado o ha sido alterado. Por favor, inicia sesión nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userAuth');
-            navigate('/login')
-          }
-        });
-      }
-    };
+    // const refreshToken = async () => {
+    //   try {
+    //     const token = localStorage.getItem('token');
+    //     const response = await api.post('/refresh_token', {}, {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`
+    //       }
+    //     });
+    //     if (response.data.code === 200) {
+    //       localStorage.setItem('token', response.data.token); // Guarda el nuevo token
+    //       Swal.fire({
+    //         title: 'Token Refrescado',
+    //         text: 'Tu sesión ha sido extendida exitosamente.',
+    //         icon: 'success',
+    //         confirmButtonText: 'Aceptar'
+    //       });
+    //     } else {
+    //       const isAlteredToken = alteredToken();
+    //       if (isAlteredToken) {
+    //         return; // Salir si el token fue alterado o es inválido
+    //       }
+    //     }
+    //   } catch (error) {
+    //     Swal.fire({
+    //       title: 'Error',
+    //       text: 'El token ha caducado o ha sido alterado. Por favor, inicia sesión nuevamente.',
+    //       icon: 'error',
+    //       confirmButtonText: 'Aceptar'
+    //     }).then((result) => {
+    //       if (result.isConfirmed) {
+    //         localStorage.removeItem('token');
+    //         localStorage.removeItem('userAuth');
+    //         navigate('/login')
+    //       }
+    //     });
+    //   }
+    // };
 
-    //TOKEN ALTERADO O INVÁLIDO
-    const alteredToken = () => {
-      Swal.fire({
-        title: 'Token alterado, invalido o esta en la lista negra.',
-        text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Aceptar',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userAuth');
-          window.redirect('/login');  // O usa navigate('/login') si deseas redirigir
-        }
-      });
-    };
-
+    // //TOKEN ALTERADO O INVÁLIDO
+    // const alteredToken = () => {
+    //   Swal.fire({
+    //     title: 'Token alterado, invalido o esta en la lista negra.',
+    //     text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonText: 'Aceptar',
+    //   }).then((result) => {
+    //     if (result.isConfirmed) {
+    //       localStorage.removeItem('token');
+    //       localStorage.removeItem('userAuth');
+    //       window.redirect('/login');  // O usa navigate('/login') si deseas redirigir
+    //     }
+    //   });
+    // };
     //TODO OBTENER ROLES
     useEffect(() => {
-      let isMounted = true;
-      // console.log('token', token);
-      const GetRole = async () => {
-        try {
-          const response = await api.get('/roles/get_roles_home', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-
-          // if (response.data.code === 401) {
-          //     console.log('No se encontró ningún token.');
-          //     return;
-          // }
-          if (isMounted) {
-            const fetchedRoles = response.data.status.data
-              // .filter(rol => rol.status !== 0)
-              .map(rol => ({ ...rol }));
-            // console.log('getRole', fetchedRoles);
-            setRoles(fetchedRoles);
-          }
-        } catch (error) {
-          refreshToken();
-          // console.error('Error al obtener los roles:', error);
-        }
+      const fechtDataRoles = async () => {
+        const fecthRoles = await getRoles();
+        setRoles(fecthRoles);
       };
-      GetRole();
-      return () => {
-        isMounted = false;
-      };
-    }, []);
-
-    //TODO OBTENER USUARIOS
-    useEffect(() => {
-
-      let isMounted = true; // Variable para evitar llamadas después de la redirección
-      const getUsers = async () => {
-        const isValid = await validateToken();
-        if (!isValid) return; // Salir para evitar llamar a `fetchUsers`
-        try {
-          const response = await api.get('/users/get_users', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          if (response.data.code === 401) {
-            console.log('No se encontró ningún token.');
-            return; // Salir si el token es inválido en esta etapa
-          }
-
-          console.log('Usuarios:', response.data.data);
-          const fetchedUsers = response.data.data
-            .filter(user => user.id !== userAuth.id || userAuth.role === 'admin')
-            .map(user => ({
-              ...user
-            }));
-            setLoading('');
-          setUsers(fetchedUsers);
-          return fetchedUsers; // Devuelve la lista de usuarios actualizada
-        } catch (error) {
-          console.error('Error al obtener los usuarios', error);
-        }
-      };
-      getUsers();
-      return () => {
-        isMounted = false; // Cleanup al desmontar el componente
-      };
-    }, [userAuth?.id, navigate]); // `token` se remueve de las dependencias
-
+      fechtDataRoles();
+    }, [])
     return (
       <>
         <Modal show={isOpen} onHide={onRequestClose}>
@@ -708,6 +647,15 @@ function User() {
     );
   };
 
+  //TODO OBTENER USUARIOS
+  useEffect(() => {
+    const fechtDataUsers = async () => {
+      const fecthUsers = await getUsers();
+      setUsers(fecthUsers);
+    };
+    fechtDataUsers();
+  }, [])
+
   return (
     <>
       <h1>Users</h1>
@@ -719,8 +667,6 @@ function User() {
           <CCard className="mb-4">
             <CCardHeader>Users</CCardHeader>
             <CCardBody>
-
-
               <CTable align="middle" className="mb-0 border" hover responsive>
                 <CTableHead className="text-nowrap">
                   <CTableRow>
@@ -736,9 +682,7 @@ function User() {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {loading ? (
-                    <p className="text-center">{loading}</p>
-                  ) : (currentUsers.map((item, index) => (
+                  {currentUsers.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">{index + 1}</CTableDataCell>
                       <CTableDataCell className="text-center">
@@ -775,12 +719,10 @@ function User() {
                         </CButton>
                       </CTableDataCell>
                     </CTableRow>
-                  )))}
-
+                  ))}
                 </CTableBody>
               </CTable>
-              <br />
-              <nav className="d-flex justify-content-end">
+              <nav>
                 <ul className="pagination">
                   {Array.from({ length: Math.ceil(users.length / usersPerPage) }, (_, index) => (
                     <li key={index + 1} className="page-item">

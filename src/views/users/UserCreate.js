@@ -27,7 +27,7 @@ const Validation = () => {
     if (error) {
       // como recorro el error para mostrarlo en el formulario
 
-      
+
     }
   }, [error]);
   const { name, email, typeIdentification, identification, phone, birthday, address, role } = formValues
