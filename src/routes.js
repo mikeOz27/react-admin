@@ -1,4 +1,6 @@
 import React from 'react'
+import  Page404  from './views/pages/page404/Page404'
+import { Navigate } from 'react-router-dom'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const User = React.lazy(() => import('./views/users/User'))
@@ -55,21 +57,25 @@ const Toasts = React.lazy(() => import('./views/notifications/toasts/Toasts'))
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 
 const token = localStorage.getItem('token') ? localStorage.getItem('token') : null
-// const Login = React.lazy(() => import('../src/components/
+const userAuth = localStorage.getItem('userAuth') ? JSON.parse(localStorage.getItem('userAuth')) : null
+
 
 const routes = [
   // { path: '/*', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
-  { path: '/users', name: 'User',
-    element: token ? (User ) : (Login)
+  {
+    path: '/users',
+    name: 'User',
+    element: token ? (userAuth && userAuth.role === 'Admin' ? User : Page404) : <Navigate to="/login" />
   },
   {
     path: '/users/create',
     name: 'UserCreate',
-    element: token ? (UserCreate) : (Login)
+    element: token ? (userAuth && userAuth.role === 'Admin' ? UserCreate : Page404) : <Navigate to="/login" />
   },
-  { path: '/blogs', name: 'Blog',
-    element: token ? (Blog ) : (Login)
+  {
+    path: '/blogs', name: 'Blog',
+    element: token ? (Blog ) : <Navigate to="/login" />
   },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },

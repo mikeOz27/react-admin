@@ -5,7 +5,7 @@ import { CContainer, CSpinner } from '@coreui/react'
 // routes config
 import routes from '../routes'
 
-const AppContent = () => {
+const AppContent = ({token, userAuth, onLogout}) => {
   return (
     <CContainer className="px-4" lg>
       <Suspense fallback={<CSpinner color="primary" />}>
@@ -19,6 +19,9 @@ const AppContent = () => {
                   exact={route.exact}
                   name={route.name}
                   element={<route.element />}
+                  token={token}
+                  userAuth={userAuth}
+                  onLogout={onLogout}
                 />
               )
             )

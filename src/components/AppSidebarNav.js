@@ -7,7 +7,7 @@ import 'simplebar-react/dist/simplebar.min.css'
 
 import { CBadge, CNavLink, CSidebarNav } from '@coreui/react'
 
-export const AppSidebarNav = ({ items }) => {
+export const AppSidebarNav = ({ items, token, userAuth, onLogout }) => {
   const navLink = (name, icon, badge, indent = false) => {
     return (
       <>

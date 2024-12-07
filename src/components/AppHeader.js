@@ -134,7 +134,9 @@ const AppHeader = ({token, onLogout, userAuth}) => {
         </CHeaderNav>
       </CContainer>
       <CContainer className="px-4" fluid>
-        <AppBreadcrumb />
+        <AppBreadcrumb token={token}
+                    userAuth={userAuth}
+                    onLogout={onLogout}/>
       </CContainer>
     </CHeader>
   )

@@ -66,8 +66,7 @@ import avatar5 from 'src/assets/images/avatars/5.jpg'
 import avatar6 from 'src/assets/images/avatars/6.jpg'
 import classNames from 'classnames'
 
-
-const Dashboard = () => {
+const Dashboard = ({token, userAuth, onLogout}) => {
 
     const progressExample = [
       { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
@@ -192,7 +191,7 @@ const Dashboard = () => {
 
     return (
       <>
-        <WidgetsDropdown className="mb-4" />
+        <WidgetsDropdown className="mb-4" token={token} userAuth={userAuth} onLogout={onLogout} />
         <CCard className="mb-4">
           <CCardBody>
             <CRow>

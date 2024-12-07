@@ -30,6 +30,35 @@ const _nav = [
   },
   {
     component: CNavTitle,
+    name: 'User',
+  },
+  // {
+  //   component: CNavItem,
+  //   name: 'List users',
+  //   to: '/users',
+  //   icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+  // },
+
+  {
+    component: CNavGroup,
+    name: 'Users',
+    to: '/users',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+          name: 'List users',
+          to: '/users',
+      },
+      {
+        component: CNavItem,
+          name: 'Create user',
+          to: '/users/create',
+      },
+    ],
+  },
+  {
+    component: CNavTitle,
     name: 'Theme',
   },
   {

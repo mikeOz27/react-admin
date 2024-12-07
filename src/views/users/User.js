@@ -55,6 +55,7 @@ function User() {
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const [loading, setLoading] = useState('Cargando...');
 
   //TODO MODAL PARA VER USUARIO
   const ViewUserModal = ({ isOpen, onRequestClose, user }) => (
@@ -569,6 +570,7 @@ function User() {
 
     //TODO OBTENER USUARIOS
     useEffect(() => {
+
       let isMounted = true; // Variable para evitar llamadas después de la redirección
       const getUsers = async () => {
         const isValid = await validateToken();
@@ -584,11 +586,13 @@ function User() {
             return; // Salir si el token es inválido en esta etapa
           }
 
-          const fetchedUsers = response.data.status.data
+          console.log('Usuarios:', response.data.data);
+          const fetchedUsers = response.data.data
             .filter(user => user.id !== userAuth.id || userAuth.role === 'admin')
             .map(user => ({
               ...user
             }));
+            setLoading('');
           setUsers(fetchedUsers);
           return fetchedUsers; // Devuelve la lista de usuarios actualizada
         } catch (error) {
@@ -715,6 +719,8 @@ function User() {
           <CCard className="mb-4">
             <CCardHeader>Users</CCardHeader>
             <CCardBody>
+
+
               <CTable align="middle" className="mb-0 border" hover responsive>
                 <CTableHead className="text-nowrap">
                   <CTableRow>
@@ -730,7 +736,9 @@ function User() {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {currentUsers.map((item, index) => (
+                  {loading ? (
+                    <p className="text-center">{loading}</p>
+                  ) : (currentUsers.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">{index + 1}</CTableDataCell>
                       <CTableDataCell className="text-center">
@@ -767,10 +775,12 @@ function User() {
                         </CButton>
                       </CTableDataCell>
                     </CTableRow>
-                  ))}
+                  )))}
+
                 </CTableBody>
               </CTable>
-              <nav>
+              <br />
+              <nav className="d-flex justify-content-end">
                 <ul className="pagination">
                   {Array.from({ length: Math.ceil(users.length / usersPerPage) }, (_, index) => (
                     <li key={index + 1} className="page-item">

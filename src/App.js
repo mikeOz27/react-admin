@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
 import './scss/examples.scss'
+import ProtectedRoute from './utils/protectedRoute'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -57,9 +58,16 @@ const App = () => {
                     <Route exact path="/register" name="Register Page" element={<Register />} />
                     <Route exact path="/404" name="Page 404" element={<Page404 />} />
                     <Route exact path="/500" name="Page 500" element={<Page500 />} />
+
                     <Route path="*" name="Home" element={<DefaultLayout  token={token}
                                         userAuth={userAuth}
                                         onLogout={handleLogout}/>} />
+
+{/* <Route element={<ProtectedRoute token={token} userAuth={userAuth} />}> */}
+
+                    {/* <Route path="/users/" element={<Navigate to="/users" />} /> */}
+                    {/* <Route path="/users/*" element={<DefaultLayout to="/users/create" />} /> */}
+{/* </Route> */}
 
                     <Route path="/login" element={token ? <Navigate to="/" /> : <Login setToken={setToken} setUser={setUser} />} />
                     <Route path="/register" element={<Register to="/register" setToken={setToken} token={token} />} />

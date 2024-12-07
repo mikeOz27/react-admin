@@ -4,13 +4,17 @@ import { AppContent, AppSidebar, AppFooter, AppHeader } from '../components/inde
 const DefaultLayout = ({token, onLogout, userAuth}) => {
   return (
     <div>
-      <AppSidebar />
+      <AppSidebar token={token}
+                    userAuth={userAuth}
+                    onLogout={onLogout}/>
       <div className="wrapper d-flex flex-column min-vh-100">
-        <AppHeader  token={token}
+        <AppHeader token={token}
                     userAuth={userAuth}
                     onLogout={onLogout}/>
         <div className="body flex-grow-1">
-          <AppContent />
+          <AppContent token={token}
+                    userAuth={userAuth}
+                    onLogout={onLogout}/>
         </div>
         <AppFooter />
       </div>
