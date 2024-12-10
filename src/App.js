@@ -30,64 +30,63 @@ const App = () => {
     };
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.href.split('?')[1])
-        const theme = urlParams.get('theme') && urlParams.get('theme').match(/^[A-Za-z0-9\s]+/)[0]
-        if (theme) {
-            setColorMode(theme)
-        }
+      const urlParams = new URLSearchParams(window.location.href.split('?')[1])
+      const theme = urlParams.get('theme') && urlParams.get('theme').match(/^[A-Za-z0-9\s]+/)[0]
+      if (theme) {
+          setColorMode(theme)
+      }
 
-        if (isColorModeSet()) {
-            return
-        }
+      if (isColorModeSet()) {
+          return
+      }
 
-        setColorMode(storedTheme)
+      setColorMode(storedTheme)
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-
         <HashRouter>
-            <Suspense
-                fallback={
-                    <div className="pt-3 text-center">
-                        <CSpinner color="primary" variant="grow" />
-                    </div>
-                }
-            >
-                <Routes>
-                    {/* <Route exact path="/*" name="Login Page" element={<Login />} /> */}
-                    <Route exact path="/register" name="Register Page" element={<Register />} />
-                    <Route exact path="/404" name="Page 404" element={<Page404 />} />
-                    <Route exact path="/500" name="Page 500" element={<Page500 />} />
+          <Suspense
+              fallback={
+                  <div className="pt-3 text-center">
+                      <CSpinner color="primary" variant="grow" />
+                  </div>
+              }
+          >
+              <Routes>
+                  {/* <Route exact path="/*" name="Login Page" element={<Login />} /> */}
+                  <Route exact path="/register" name="Register Page" element={<Register />} />
+                  <Route exact path="/404" name="Page 404" element={<Page404 />} />
+                  <Route exact path="/500" name="Page 500" element={<Page500 />} />
 
-                    <Route path="*" name="Home" element={<DefaultLayout  token={token}
-                                        userAuth={userAuth}
-                                        onLogout={handleLogout}/>} />
+                  <Route path="*" name="Home" element={<DefaultLayout setToken={setToken} token={token}
+                                      userAuth={userAuth}
+                                      onLogout={handleLogout}/>} />
 
 {/* <Route element={<ProtectedRoute token={token} userAuth={userAuth} />}> */}
 
-                    {/* <Route path="/users/" element={<Navigate to="/users" />} /> */}
-                    {/* <Route path="/users/*" element={<DefaultLayout to="/users/create" />} /> */}
+                  {/* <Route path="/users/" element={<Navigate to="/users" />} /> */}
+                  {/* <Route path="/users/*" element={<DefaultLayout to="/users/create" />} /> */}
 {/* </Route> */}
 
-                    <Route path="/login" element={token ? <Navigate to="/" /> : <Login setToken={setToken} setUser={setUser} />} />
-                    <Route path="/register" element={<Register to="/register" setToken={setToken} token={token} />} />
-                    <Route path="/"
-                        element={
-                            token ? (
-                                <>
-                                    <DefaultLayout
-                                        token={token}
-                                        userAuth={userAuth}
-                                        onLogout={handleLogout}
-                                    />
-                                </>
-                            ) : (
-                                <Navigate to="/login" />
-                            )
-                        }
-                    />
-                </Routes>
-            </Suspense>
+                  <Route path="/login" element={token ? <Navigate to="/" /> : <Login setToken={setToken} token={token} setUser={setUser} />} />
+                  <Route path="/register" element={<Register to="/register"  token={token} />} />
+                  <Route path="/"
+                      element={
+                          token ? (
+                              <>
+                                  <DefaultLayout
+                                      token={token}
+                                      userAuth={userAuth}
+                                      onLogout={handleLogout}
+                                  />
+                              </>
+                          ) : (
+                              <Navigate to="/login" />
+                          )
+                      }
+                  />
+              </Routes>
+          </Suspense>
         </HashRouter>
     )
 }

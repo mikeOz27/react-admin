@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import api from '../api/axios'
+import { Navigate } from 'react-router-dom'
+import env from '../constants/apiConst'
+
 export const useForm = () => {
   const [validated, setValidated] = useState(false)
   const [formValues, setFormValues] = useState({
@@ -16,10 +19,13 @@ export const useForm = () => {
   const [formErrors, setFormErrors] = useState({})
   const [error, setError] = useState(null)
   const token = localStorage.getItem('token')
+  const { environment } = env
+  const [file, setFile] = useState();
 
   const handleSubmit = (event) => {
     event.preventDefault()
     const form = event.currentTarget
+    console.log(form)
 
     if (form.checkValidity() === false) {
       event.preventDefault()
@@ -31,6 +37,7 @@ export const useForm = () => {
     const formValues = {
       name: target.name.value,
       email: target.email.value,
+      image: target.image.value,
       typeIdentification: target.typeIdentification.value,
       identification: target.identification.value,
       phone: target.phone.value,
@@ -39,19 +46,21 @@ export const useForm = () => {
       role: target.role.value
     }
     userSave(formValues)
+    console.log(formValues)
   }
 
   const userSave = async () => {
-    const response = await api.post('/users/create_user', formValues, {
+    const response = await api.post(environment.REGISTER_USER, formValues, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
     setError(response.data.status.message)
-    if (response.data.status.success) {
+    if (response.data.status.code === 200) {
       setFormValues({
         name: '',
         email: '',
+        image: '',
         typeIdentification: '',
         identification: '',
         phone: '',
@@ -59,6 +68,7 @@ export const useForm = () => {
         address: '',
         role: ''
       })
+
     }
     return response.data.status
     }
@@ -79,13 +89,22 @@ export const useForm = () => {
     })
   }
 
+
+  function handleChangeImage(e) {
+    e.preventDefault
+    console.log(e.target.files[0]);
+    setFile(URL.createObjectURL(e.target.files[0]));
+  }
+
   return {
     error,
     validated,
     formValues,
     formErrors,
+    file,
     handleSubmit,
     handleBlur,
-    handleChange
+    handleChange,
+    handleChangeImage
   }
 }

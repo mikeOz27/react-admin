@@ -1,12 +1,11 @@
 import api from '../api/axios';
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { createContext } from 'react';
 import env from '../constants/apiConst';
 
-const LoginContext = createContext({});
+const LoginContext = createContext();
 
 function LoginProvider(props) {
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');

@@ -13,6 +13,19 @@ const environment = {
     ME: '/me',
     RefreshToken: '/refresh',
     LOGIN: '/login',
+    REGISTER: '/register',
+    LOGOUT: '/logout',
+    FORGOT_PASSWORD: '/forgot-password',
+    RESET_PASSWORD: '/reset-password',
+    VERIFY_EMAIL: '/verify-email',
+    /** ********* USERS ***********/
+    USERS: '/users',
+    COUNT_USERS: '/users/count_users',
+    ACTIVATE_USER: 'users/activate_user',
+    DESACTIVATE_USER: 'users/desactivate_user',
+    REGISTER_USER: '/users/register_user',
+    UPDATE_USER: '/users/update_user/',
+    DELETE_USER: '/users/delete_user/',
 };
 
 export default { BASE_URL, environment };

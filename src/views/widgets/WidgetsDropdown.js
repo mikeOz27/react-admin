@@ -48,7 +48,7 @@ const WidgetsDropdown = (props) => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Cantidad de blogs:', response.data.data);
+      // console.log('Cantidad de blogs:', response.data.data);
       return response.data
     }
     catch (error) {
@@ -63,7 +63,7 @@ const WidgetsDropdown = (props) => {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Cantidad de roles:', response.data.data);
+      // console.log('Cantidad de roles:', response.data.data);
       return response.data
     }
     catch (error) {
@@ -90,7 +90,7 @@ const WidgetsDropdown = (props) => {
     const fetchDataUser = async () => {
       const userCount = await countUsers();
       setCountUser(userCount.data);
-      console.log('Cantidad de usuarios:', userCount.data);
+      // console.log('Cantidad de usuarios:', userCount.data);
     };
 
     const fetchDataBlog = async () => {
@@ -291,7 +291,7 @@ const WidgetsDropdown = (props) => {
           value={
             <>
               {countRole !== null ? countRole : '0'}{' '}
-              
+
             </>
           }
           title="Roles"

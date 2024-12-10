@@ -1,13 +1,5 @@
-import { useState, useMemo } from 'react'
-import api from '../api/axios'
-import { redirect } from 'react-router-dom';
-import Swal from 'sweetalert2';
-
-export const useRole = () => {
-  const token = localStorage.getItem('token')
-  const [userAuth] = useState(JSON.parse(localStorage.getItem('userAuth')));
-
-  // REFRESH TOKEN
+export const TokenValidate = () => {
+  // REFRESCAR TOKEN
   const refreshToken = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -40,6 +32,24 @@ export const useRole = () => {
         }
       });
     }
+  // Ejecutar la función cada 1 hora
+  setInterval(refreshToken, 3600000);
+  };
+
+  const alteredToken = () => {
+    Swal.fire({
+      title: 'Token alterado, invalido o esta en la lista negra.',
+      text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userAuth');
+        window.redirect('/login');  // O usa navigate('/login') si deseas redirigir
+      }
+    });
   };
 
   // VALIDAR TOKEN
@@ -52,8 +62,8 @@ export const useRole = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log(response.data.code)
-            if (response.data.code === 401) {
+
+            if (response.status.code === 401) {
                 Swal.fire({
                     title: 'Sesión Expirada',
                     text: 'Tu sesión ha expirado. ¿Deseas refrescar el token?',
@@ -91,18 +101,10 @@ export const useRole = () => {
         return false;
     }
   }
-
-  const getRoles = async () => {
-    // const vToken = await validateToken()
-    // if (!vToken) redirect('/login')
-    const response = await api.get('/roles/get_roles_home', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    return response.data.status.data
-  }
+  
   return {
-    getRoles
+    refreshToken,
+    alteredToken,
+    validateToken
   }
 }

@@ -38,6 +38,8 @@ import {
 
 import { useRole } from '../../hoks/useRole'
 import { useUser } from '../../hoks/useUser'
+import env from '../../constants/apiConst'
+import { useForm } from '../../hoks/useForm'
 
 function User() {
   const [token] = useState(localStorage.getItem('token'));
@@ -59,6 +61,12 @@ function User() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const { getRoles } = useRole();
   const { getUsers } = useUser();
+
+  const { environment } = env
+
+  // const { handleChangeImage, file } = useForm();
+  const [file, setFile] = useState();
+  // console.log('file', file)
 
   //TODO MODAL PARA VER USUARIO
   const ViewUserModal = ({ isOpen, onRequestClose, user }) => (
@@ -194,138 +202,26 @@ function User() {
     );
   };
 
-  // VALIDAR TOKEN
-  async function validateToken() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await api.post('/validate_token', {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.status.code === 401) {
-          Swal.fire({
-            title: 'Sesión Expirada',
-            text: 'Tu sesión ha expirado. ¿Deseas refrescar el token?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Refrescar',
-            cancelButtonText: 'Cerrar sesión'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              refreshToken(); // Intenta refrescar el token
-              return false;
-            } else {
-              alteredToken();
-              return false;
-            }
-          });
-        } else {
-          if (response.data.code === 200) {
-            return true; // Token válido
-          }
-        }
-      } catch (error) {
-        if (error.response) {
-          // Si el error es un token blacklisted (revocado)
-          if (error.response.data.message === 'The token has been blacklisted') {
-            alteredToken();  // Llamamos a la función para manejar el token blacklisted
-          }
-          // Otros errores de validación de token
-          if (error.response.data.code === 401) {
-            alteredToken();  // Llamamos a la misma función si hay un 401
-          }
-        }
-        return false; // Token inválido o expirado
-      }
-      return false;
-    }
-  }
-
-  // REFRESCAR TOKEN
-  const refreshToken = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await api.post('/refresh_token', {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (response.data.code === 200) {
-        localStorage.setItem('token', response.data.token); // Guarda el nuevo token
-        Swal.fire({
-          title: 'Token Refrescado',
-          text: 'Tu sesión ha sido extendida exitosamente.',
-          icon: 'success',
-          confirmButtonText: 'Aceptar'
-        });
-      } else {
-        const isAlteredToken = alteredToken();
-        if (isAlteredToken) {
-          return; // Salir si el token fue alterado o es inválido
-        }
-      }
-    } catch (error) {
-      Swal.fire({
-        title: 'Error',
-        text: 'El token ha caducado o ha sido alterado. Por favor, inicia sesión nuevamente.',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userAuth');
-          console.log(result)
-          navigate('/login')
-        }
-      });
-    }
-  };
-
-  //TOKEN ALTERADO O INVÁLIDO
-  const alteredToken = () => {
-    Swal.fire({
-      title: 'Token alterado, invalido o esta en la lista negra.',
-      text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Aceptar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userAuth');
-        navigate('/login')
-      }
-    });
-  };
-
   /* FUNCIONES PARA EL CRUD DE USUARIOS */
   //TODO Función para cambiar el estado de un usuario! */
   const toggleUserActivation = async (userId, isActive) => {
     try {
-      const isValidToken = await validateToken();  // Validar el token primero
-      if (isValidToken === false) {
-        refreshToken(); // Refrescar el token si es válido
+      if (isActive) {
+        await api.get(`users/desactivate_user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       } else {
-        if (isActive) {
-          await api.get(`users/desactivate_user/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        } else {
-          await api.get(`users/activate_user/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        }
-        setUsers(users.map(user =>
-          user.id === userId ? { ...user, status: isActive ? 0 : 1 } : user
-        ));
+        await api.get(`users/activate_user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
       }
+      setUsers(users.map(user =>
+        user.id === userId ? { ...user, status: isActive ? 0 : 1 } : user
+      ));
     } catch (error) {
       console.error('Error al cambiar el estado del usuario', error);
     }
@@ -334,23 +230,16 @@ function User() {
   //TODO Función para registrar usuario! */
   const handleRegisterUser = async (newUser) => {
     try {
-      const isValidToken = await validateToken();  // Validar el token primero
-      if (isValidToken === false) {
-        refreshToken(); // Refrescar el token si es válido
-      } else {
-        const response = await api.post('/users/register_user', newUser, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        const registeredUser = response.data.status.data;  // El nuevo usuario registrado
-
-        // Agregar el nuevo usuario a la lista de usuarios existente en el estado
-        setUsers([...users, registeredUser]);
-        setRegisterModalOpen(false);
-
-      }
+      const response = await api.post(environment.REGISTER, newUser, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const registeredUser = response.data.status.data;  // El nuevo usuario registrado
+      // Agregar el nuevo usuario a la lista de usuarios existente en el estado
+      setUsers([...users, registeredUser]);
+      setRegisterModalOpen(false);
     } catch (error) {
       // Verifica si hay un error de respuesta del backend
       if (error.response) {
@@ -377,20 +266,15 @@ function User() {
   //TODO Función para actualizar usuario! */
   const handleUpdateUser = async (updatedUser) => {
     try {
-      const isValidToken = await validateToken();  // Validar el token primero
-      if (isValidToken === false) {
-        refreshToken(); // Refrescar el token si es válido
-      } else {
-        await api.put(`/users/update_user/${updatedUser.id}`, updatedUser, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        setUsers(users.map(user =>
-          user.id === updatedUser.id ? updatedUser : user
-        ));
-        setEditModalOpen(false);
-      }
+      await api.put(environment.UPDATE_USER + updatedUser.id, updatedUser, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUsers(users.map(user =>
+        user.id === updatedUser.id ? updatedUser : user
+      ));
+      setEditModalOpen(false);
     } catch (error) {
       console.error('Error al actualizar el usuario', error);
     }
@@ -399,23 +283,19 @@ function User() {
   //TODO Función para eliminar usuario! */
   const handleDeleteUser = async (userId) => {
     try {
-      const isValidToken = await validateToken();  // Validar el token primero
-      if (isValidToken === false) {
-        refreshToken(); // Refrescar el token si es válido
-      } else {
-        await api.delete(`/users/delete_user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }).then((response) => {
-          if (response && response.data) {
-            setUsers(users.filter(user => user.id !== userId));
-          }
-        })
-          .catch((error) => {
-            console.error(error);
-          });
-      }
+      await api.delete(environment.DELETE_USER + userId, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then((response) => {
+        if (response && response.data) {
+          setUsers(users.filter(user => user.id !== userId));
+        }
+      })
+        .catch((error) => {
+          console.error(error);
+        });
+
     } catch (error) {
       console.error('Error al eliminar el usuario', error);
     }
@@ -481,61 +361,6 @@ function User() {
       }
     };
 
-    // REFRESCAR TOKEN
-    // const refreshToken = async () => {
-    //   try {
-    //     const token = localStorage.getItem('token');
-    //     const response = await api.post('/refresh_token', {}, {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`
-    //       }
-    //     });
-    //     if (response.data.code === 200) {
-    //       localStorage.setItem('token', response.data.token); // Guarda el nuevo token
-    //       Swal.fire({
-    //         title: 'Token Refrescado',
-    //         text: 'Tu sesión ha sido extendida exitosamente.',
-    //         icon: 'success',
-    //         confirmButtonText: 'Aceptar'
-    //       });
-    //     } else {
-    //       const isAlteredToken = alteredToken();
-    //       if (isAlteredToken) {
-    //         return; // Salir si el token fue alterado o es inválido
-    //       }
-    //     }
-    //   } catch (error) {
-    //     Swal.fire({
-    //       title: 'Error',
-    //       text: 'El token ha caducado o ha sido alterado. Por favor, inicia sesión nuevamente.',
-    //       icon: 'error',
-    //       confirmButtonText: 'Aceptar'
-    //     }).then((result) => {
-    //       if (result.isConfirmed) {
-    //         localStorage.removeItem('token');
-    //         localStorage.removeItem('userAuth');
-    //         navigate('/login')
-    //       }
-    //     });
-    //   }
-    // };
-
-    // //TOKEN ALTERADO O INVÁLIDO
-    // const alteredToken = () => {
-    //   Swal.fire({
-    //     title: 'Token alterado, invalido o esta en la lista negra.',
-    //     text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-    //     icon: 'warning',
-    //     showCancelButton: true,
-    //     confirmButtonText: 'Aceptar',
-    //   }).then((result) => {
-    //     if (result.isConfirmed) {
-    //       localStorage.removeItem('token');
-    //       localStorage.removeItem('userAuth');
-    //       window.redirect('/login');  // O usa navigate('/login') si deseas redirigir
-    //     }
-    //   });
-    // };
     //TODO OBTENER ROLES
     useEffect(() => {
       const fechtDataRoles = async () => {
@@ -544,6 +369,14 @@ function User() {
       };
       fechtDataRoles();
     }, [])
+
+    function handleChangeImage(e) {
+      e.preventDefault
+      console.log(e.target.files[0]);
+      setFile(URL.createObjectURL(e.target.files[0]));
+    }
+
+    //TODO RETURN DE MODAL DE REGISTRO
     return (
       <>
         <Modal show={isOpen} onHide={onRequestClose}>
@@ -564,9 +397,43 @@ function User() {
                   className="form-control"
                   id="image"
                   name="image"
-                  onChange={(e) => setNewUser({ ...newUser, image: e.target.files[0] })}
+                  onChange={
+                    (e) => {
+                      // handleChangeImage(e);
+                      // e.preventDefault();
+                      setNewUser({ ...newUser, image: e.target.files[0] });
+                      // setFile(URL.createObjectURL(e.target.files[0]));
+                    }}
+                  style={{ display: 'none' }}
                 />
+                {/* <CFormInput
+                  type="file"
+                  id="image"
+                  name="image"
+                  onChange={
+                  (e) => {
+                    handleChangeImage(e);
+                    setNewUser({ ...newUser, image: file });
+                  }}
+                  style={{ display: 'none' }}
+                /> */}
+                {/* <div
+                  color="primary"
+                  type="button"
+                  display="flex"
+                  onClick={() => document.getElementById('image').click()}
+                  style={{ display: 'flex', alignItems: 'center', backgroundColor: 'transparent', cursor: 'pointer', height: '150px', width: '150px' }}
+                >
+
+                    <img
+                      src= {file ? file : ("src/assets/images/avatars/avatar.png")}
+                      alt="Default"
+                      name="image"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', marginRight: '10px', borderRadius: '50%' }}
+                    />
+                </div> */}
               </div>
+
               <br />
               <div className="form-group">
                 <div className="input-group mb-3">
@@ -656,6 +523,13 @@ function User() {
     fechtDataUsers();
   }, [])
 
+  //TODO SALTAR EL PAGINADO, SI YA NO HAY USUARIOS EN LA LISTA
+  useEffect(() => {
+    if (currentUsers.length === 0 && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  }, [users, currentUsers, currentPage]);
+
   return (
     <>
       <h1>Users</h1>
@@ -722,7 +596,8 @@ function User() {
                   ))}
                 </CTableBody>
               </CTable>
-              <nav>
+              <br />
+              <nav className="d-flex justify-content-end">
                 <ul className="pagination">
                   {Array.from({ length: Math.ceil(users.length / usersPerPage) }, (_, index) => (
                     <li key={index + 1} className="page-item">
