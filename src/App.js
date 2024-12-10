@@ -5,6 +5,9 @@ import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
 import './scss/examples.scss'
 import ProtectedRoute from './utils/protectedRoute'
+import { use } from 'react'
+import Blog from './views/blogs/Blog'
+import BlogId from './views/blogs/BlogId'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -21,7 +24,7 @@ const App = () => {
 
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [userAuth, setUser] = useState(JSON.parse(localStorage.getItem('userAuth')));
-
+    console.log('token', token);
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userAuth');
@@ -41,36 +44,31 @@ const App = () => {
       }
 
       setColorMode(storedTheme)
+
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <HashRouter>
-          <Suspense
+          {/* <Suspense
               fallback={
                   <div className="pt-3 text-center">
                       <CSpinner color="primary" variant="grow" />
                   </div>
               }
-          >
+          > */}
               <Routes>
                   {/* <Route exact path="/*" name="Login Page" element={<Login />} /> */}
                   <Route exact path="/register" name="Register Page" element={<Register />} />
                   <Route exact path="/404" name="Page 404" element={<Page404 />} />
                   <Route exact path="/500" name="Page 500" element={<Page500 />} />
 
-                  <Route path="*" name="Home" element={<DefaultLayout setToken={setToken} token={token}
+                  {/* <Route path="*" name="Home" element={<DefaultLayout setToken={setToken} token={token}
                                       userAuth={userAuth}
-                                      onLogout={handleLogout}/>} />
-
-{/* <Route element={<ProtectedRoute token={token} userAuth={userAuth} />}> */}
-
-                  {/* <Route path="/users/" element={<Navigate to="/users" />} /> */}
-                  {/* <Route path="/users/*" element={<DefaultLayout to="/users/create" />} /> */}
-{/* </Route> */}
+                                      onLogout={handleLogout}/>} /> */}
 
                   <Route path="/login" element={token ? <Navigate to="/" /> : <Login setToken={setToken} token={token} setUser={setUser} />} />
                   <Route path="/register" element={<Register to="/register"  token={token} />} />
-                  <Route path="/"
+                  <Route path="*"
                       element={
                           token ? (
                               <>
@@ -81,12 +79,15 @@ const App = () => {
                                   />
                               </>
                           ) : (
-                              <Navigate to="/login" />
+                            <Navigate to="/login" />
                           )
                       }
                   />
+                  <Route path="/blogs" element={<Blog></Blog> } />
+                  <Route path="/blog/:id" element={<BlogId/> } />
+
               </Routes>
-          </Suspense>
+          {/* </Suspense> */}
         </HashRouter>
     )
 }

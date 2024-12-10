@@ -1,8 +1,6 @@
 import api from '../../api/axios'
 import { Modal, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
 import CIcon from '@coreui/icons-react'
 
 import {
@@ -39,11 +37,9 @@ import {
 import { useRole } from '../../hoks/useRole'
 import { useUser } from '../../hoks/useUser'
 import env from '../../constants/apiConst'
-import { useForm } from '../../hoks/useForm'
 
 function User() {
   const [token] = useState(localStorage.getItem('token'));
-  const navigate = useNavigate();
 
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [isViewModalOpen, setViewModalOpen] = useState(false);
@@ -64,9 +60,7 @@ function User() {
 
   const { environment } = env
 
-  // const { handleChangeImage, file } = useForm();
   const [file, setFile] = useState();
-  // console.log('file', file)
 
   //TODO MODAL PARA VER USUARIO
   const ViewUserModal = ({ isOpen, onRequestClose, user }) => (
@@ -369,12 +363,6 @@ function User() {
       };
       fechtDataRoles();
     }, [])
-
-    function handleChangeImage(e) {
-      e.preventDefault
-      console.log(e.target.files[0]);
-      setFile(URL.createObjectURL(e.target.files[0]));
-    }
 
     //TODO RETURN DE MODAL DE REGISTRO
     return (

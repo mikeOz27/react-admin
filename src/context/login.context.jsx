@@ -51,9 +51,9 @@ function LoginProvider(props) {
     };
 
     return (
-        <LoginContext.Provider value={{ email, setEmail, password, setPassword, errorMessage, setErrorMessage, login }}>
-            {props.children}
-        </LoginContext.Provider>
+      <LoginContext.Provider value={{ email, setEmail, password, setPassword, errorMessage, setErrorMessage, login }}>
+          {props.children}
+      </LoginContext.Provider>
     );
 }
 

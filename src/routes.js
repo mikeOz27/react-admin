@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import  Page404  from './views/pages/page404/Page404'
 import { Navigate } from 'react-router-dom'
 
@@ -80,54 +80,54 @@ const userAuth = localStorage.getItem('userAuth') ? JSON.parse(localStorage.getI
 // }
 
 // VALIDAR TOKEN
-// async function validateToken() {
-//   const token = localStorage.getItem('token');
-//   if (token) {
-//       try {
-//           const response = await api.post('/validate_token', {}, {
-//               headers: {
-//                   Authorization: `Bearer ${token}`
-//               }
-//           });
+async function validateToken() {
+  const token = localStorage.getItem('token');
+  if (token) {
+      try {
+          const response = await api.post('/validate_token', {}, {
+              headers: {
+                  Authorization: `Bearer ${token}`
+              }
+          });
 
-//           if (response.status.code === 401) {
-//               Swal.fire({
-//                   title: 'Sesión Expirada',
-//                   text: 'Tu sesión ha expirado. ¿Deseas refrescar el token?',
-//                   icon: 'warning',
-//                   showCancelButton: true,
-//                   confirmButtonText: 'Refrescar',
-//                   cancelButtonText: 'Cerrar sesión'
-//               }).then((result) => {
-//                   if (result.isConfirmed) {
-//                       refreshToken(); // Intenta refrescar el token
-//                       return false;
-//                   } else {
-//                       alteredToken();
-//                       return false;
-//                   }
-//               });
-//           }else{
-//               if (response.data.code === 200) {
-//                   return true; // Token válido
-//               }
-//           }
-//       } catch (error) {
-//           if (error.response) {
-//               // Si el error es un token blacklisted (revocado)
-//               if (error.response.data.message === 'The token has been blacklisted') {
-//                   alteredToken();  // Llamamos a la función para manejar el token blacklisted
-//               }
-//               // Otros errores de validación de token
-//               if (error.response.data.code === 401) {
-//                   alteredToken();  // Llamamos a la misma función si hay un 401
-//               }
-//           }
-//           return false; // Token inválido o expirado
-//       }
-//       return false;
-//   }
-// }
+          if (response.status.code === 401) {
+              Swal.fire({
+                  title: 'Sesión Expirada',
+                  text: 'Tu sesión ha expirado. ¿Deseas refrescar el token?',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Refrescar',
+                  cancelButtonText: 'Cerrar sesión'
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      refreshToken(); // Intenta refrescar el token
+                      return false;
+                  } else {
+                      alteredToken();
+                      return false;
+                  }
+              });
+          }else{
+              if (response.data.code === 200) {
+                  return true; // Token válido
+              }
+          }
+      } catch (error) {
+          if (error.response) {
+              // Si el error es un token blacklisted (revocado)
+              if (error.response.data.message === 'The token has been blacklisted') {
+                  alteredToken();  // Llamamos a la función para manejar el token blacklisted
+              }
+              // Otros errores de validación de token
+              if (error.response.data.code === 401) {
+                  alteredToken();  // Llamamos a la misma función si hay un 401
+              }
+          }
+          return false; // Token inválido o expirado
+      }
+      return false;
+  }
+}
 
 
 const routes = [
@@ -143,10 +143,10 @@ const routes = [
     name: 'UserCreate',
     element: token ? (userAuth && userAuth.role.name === 'Admin' ? UserCreate : Page404) : <Navigate to="/login" />
   },
-  {
-    path: '/blogs', name: 'Blog',
-    element: token ? (Blog ) : <Navigate to="/login" />
-  },
+  // {
+  //   path: '/blogs', name: 'Blog',
+  // },
+  // { path: '/blog', name: 'Blog', element: Blog, exact: true },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },
